@@ -1,0 +1,150 @@
+/* Epaladeniya Agro City — base site styles (storefront) */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #212121;
+    background: #fafafa;
+    line-height: 1.5;
+}
+a { color: #2e7d32; text-decoration: none; }
+a:hover { text-decoration: underline; }
+img { max-width: 100%; height: auto; }
+
+/* ------- Layout ------- */
+main { min-height: 70vh; }
+.container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+
+/* ------- Buttons ------- */
+.btn,
+.btn-primary {
+    display: inline-block;
+    padding: 0.6rem 1.4rem;
+    background: #2e7d32;
+    color: #fff !important;
+    border: none;
+    border-radius: 50px;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+.btn:hover, .btn-primary:hover { background: #1b5e20; text-decoration: none; }
+.btn-outline {
+    display: inline-block;
+    padding: 0.6rem 1.4rem;
+    background: transparent;
+    color: #2e7d32 !important;
+    border: 2px solid #2e7d32;
+    border-radius: 50px;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* ------- Forms ------- */
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; margin-bottom: 0.3rem; font-weight: 600; color: #1b5e20; }
+input[type="text"], input[type="email"], input[type="password"], input[type="tel"],
+input[type="number"], input[type="date"], select, textarea {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    background: #fff;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid #c8e6c9; border-color: #2e7d32; }
+
+/* ------- Tables ------- */
+.table-container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow-x: auto;
+}
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid #eee; }
+th { background: #2e7d32; color: #fff; font-weight: 600; }
+tbody tr:hover { background: #f5fbf5; }
+
+/* ------- Product grid + cards ------- */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+.product-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.product-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+.product-card h3 { color: #1b5e20; margin: 0.3rem 0 0.6rem; }
+.product-card .price { color: #ff8f00; font-weight: 700; font-size: 1.15rem; margin: 0.4rem 0; }
+
+/* ------- Footer ------- */
+footer {
+    background: #1b5e20;
+    color: #e0e0e0;
+    padding: 3rem 2rem 1rem;
+    margin-top: 4rem;
+}
+footer h3 { color: #ffb300; margin: 0 0 0.8rem; font-size: 1.1rem; }
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+}
+.footer-column a { display: block; color: #c8e6c9; margin: 0.3rem 0; }
+.footer-column a:hover { color: #ffb300; text-decoration: none; }
+.footer-column p { margin: 0.4rem 0; color: #c8e6c9; font-size: 0.92rem; }
+.footer-column i { margin-right: 0.4rem; color: #ffb300; }
+.social-links a {
+    display: inline-block;
+    margin-right: 0.6rem;
+    font-size: 1.3rem;
+    color: #ffb300;
+}
+.copyright {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #2e7d32;
+    color: #a5d6a7;
+    font-size: 0.85rem;
+}
+
+/* ------- Section header ------- */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.section-header h1, .section-header h2 { color: #1b5e20; margin: 0; }
+
+/* ------- Action buttons inside tables ------- */
+.action-btn {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    background: #ffb74d;
+    color: #212121 !important;
+    text-decoration: none;
+    font-size: 0.85rem;
+    border: none;
+    cursor: pointer;
+    margin-right: 0.3rem;
+}
+.action-btn:hover { background: #ffa726; text-decoration: none; }
+.action-btn.edit-btn { background: #64b5f6; color: #fff !important; }
+.action-btn.delete-btn { background: #e57373; color: #fff !important; }

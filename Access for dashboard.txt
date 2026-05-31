@@ -1,0 +1,61 @@
+I have created two filles in admin folder to test.
+	admin/switch-role.php
+	admin/admin/test-roles.php
+
+
+
+
+Following codes are used to run it,
+
+
+
+
+1) switch-role.php
+
+<?php
+session_start();
+if (isset($_POST['role'])) {
+    $_SESSION['admin_role'] = $_POST['role'];
+    // Redirect back to the page you came from, or to a default
+    $redirect = $_POST['redirect'] ?? '/fertilizer-shop/admin/index.php';
+    header('Location: ' . $redirect);
+    exit;
+}
+// If accessed directly, show a simple message
+echo 'Use this page only via POST.';
+
+
+
+2) admin/test-roles.php
+
+<?php
+session_start();
+$current_role = $_SESSION['admin_role'] ?? 'none';
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Role Tester</title>
+</head>
+<body>
+    <h2>Role Testing Page</h2>
+    <p>Current role: <strong><?php echo htmlspecialchars($current_role); ?></strong></p>
+
+    <h3>Switch Role:</h3>
+    <form method="post" action="switch-role.php">
+        <input type="hidden" name="redirect" value="test-roles.php">
+        <button type="submit" name="role" value="owner">Set Owner</button>
+        <button type="submit" name="role" value="cashier">Set Cashier</button>
+        <button type="submit" name="role" value="operator">Set Operator</button>
+    </form>
+
+    <h3>Go to Dashboard:</h3>
+    <ul>
+        <li><a href="owner/dashboard.php">Owner Dashboard</a></li>
+        <li><a href="cashier/pos.php">Cashier POS</a></li>
+        <li><a href="operator/products.php">Operator Products</a></li>
+    </ul>
+    <p><em>Note: After switching role, the sidebar will show the appropriate links.</em></p>
+</body>
+</html>

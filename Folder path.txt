@@ -1,0 +1,64 @@
+fertilizer-shop/
+│
+├── assets/
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   └── main.js
+│   └── images/            (empty – add your own)
+│
+├── includes/
+│   ├── config.php
+│   ├── functions.php
+│   ├── header.php         (public header)
+│   └── footer.php         (public footer)
+│
+├── admin/
+│   ├── index.php          (redirect to role dashboard)
+│   ├── login.php
+│   ├── logout.php
+│   ├── switch-role.php    (dev tool)
+│   ├── test-roles.php     (dev tool)
+│   │
+│   ├── includes/
+│   │   ├── admin_header.php
+│   │   ├── admin_footer.php
+│   │   └── auth_check.php
+│   │
+│   ├── owner/
+│   │   ├── dashboard.php
+│   │   ├── inventory.php
+│   │   ├── suppliers.php
+│   │   ├── reports.php
+│   │   ├── users.php
+│   │   ├── add-user.php
+│   │   ├── edit-user.php
+│   │   └── transactions.php
+│   │
+│   ├── cashier/
+│   │   ├── dashboard.php
+│   │   ├── pos.php
+│   │   ├── transactions.php
+│   │   ├── invoice.php
+│   │   └── process_sale.php
+│   │
+│   └── operator/
+│       ├── dashboard.php
+│       ├── inventory.php
+│       ├── inventory-update.php
+│       └── products.php
+│
+└── public/
+    ├── index.php
+    ├── products.php
+    ├── product.php
+    ├── cart.php
+    ├── checkout.php
+    ├── about.php
+    ├── contact.php
+    ├── login.php
+    ├── register.php
+    │
+    └── account/
+        ├── dashboard.php
+        └── orders.php

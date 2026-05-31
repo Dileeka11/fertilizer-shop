@@ -1,0 +1,56 @@
+[
+    {
+        "id": "INV-20260322-001",
+        "items": [
+            { "id": "F001", "name": "Crop Master Fertilizer", "price": 2500, "qty": 2, "discount": 0 },
+            { "id": "S001", "name": "Tomato Seeds", "price": 0.045, "qty": 10000, "discount": 5 }
+        ],
+        "customer": "Kamal Perera",
+        "customer_id": "871234567V",
+        "payment_method": "Cash",
+        "cashier": "Kasun",
+        "date": "2026-03-22 10:30:00",
+        "subtotal": 5450,
+        "product_discount_total": 22.5,
+        "global_discount_type": "percent",
+        "global_discount_value": 10,
+        "global_discount_amount": 542.75,
+        "total": 4884.75
+    },
+    {
+        "id": "INV-20260322-002",
+        "items": [
+            { "id": "T001", "name": "Garden Hoe", "price": 850, "qty": 1, "discount": 0 },
+            { "id": "I001", "name": "Insecticide Spray", "price": 1.2, "qty": 5000, "discount": 10 }
+        ],
+        "customer": "Nimal Silva",
+        "customer_id": "",
+        "payment_method": "Card",
+        "cashier": "Kasun",
+        "date": "2026-03-22 14:15:00",
+        "subtotal": 6850,
+        "product_discount_total": 600,
+        "global_discount_type": "fixed",
+        "global_discount_value": 200,
+        "global_discount_amount": 200,
+        "total": 6050
+    },
+    {
+        "id": "INV-20260322-003",
+        "items": [
+            { "id": "F003", "name": "Potassium Fertilizer", "price": 1800, "qty": 3, "discount": 5 },
+            { "id": "T004", "name": "Spade Shovel", "price": 950, "qty": 2, "discount": 5 }
+        ],
+        "customer": "Sunil Jayasuriya",
+        "customer_id": "912345678V",
+        "payment_method": "Cash",
+        "cashier": "Kasun",
+        "date": "2026-03-22 16:45:00",
+        "subtotal": 7300,
+        "product_discount_total": 365,
+        "global_discount_type": "none",
+        "global_discount_value": 0,
+        "global_discount_amount": 0,
+        "total": 6935
+    }
+]
