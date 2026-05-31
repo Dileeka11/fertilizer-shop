@@ -1,28 +1,19 @@
 <?php
-require_once '../includes/auth_check.php';
-require_once '../../includes/config.php';
-include '../includes/admin_header.php';
+require_once __DIR__ . '/../../partials/auth_check.php';
+include __DIR__ . '/../../partials/admin_header.php';
 
 $filter = $_GET['date'] ?? '';
-$query = "SELECT s.sale_id, s.sale_date, CONCAT(c.first_name,' ',c.last_name) as customer, s.total, p.payment_method
-          FROM sales s
-          LEFT JOIN customers c ON s.customer_no = c.customer_no
-          LEFT JOIN payments p ON s.sale_no = p.sale_no
-          ORDER BY s.sale_no DESC";
-if ($filter) {
-    $query = "SELECT s.sale_id, s.sale_date, CONCAT(c.first_name,' ',c.last_name) as customer, s.total, p.payment_method
-              FROM sales s
-              LEFT JOIN customers c ON s.customer_no = c.customer_no
-              LEFT JOIN payments p ON s.sale_no = p.sale_no
-              WHERE DATE(s.sale_date) = '$filter'
-              ORDER BY s.sale_no DESC";
-}
-$result = $conn->query($query);
-$transactions = $result->fetch_all(MYSQLI_ASSOC);
+$transactions = Sale::list(['date' => $filter]);
 ?>
 <style>
     .filter-bar { background: white; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; }
-    .btn-small { background: #2196f3; color: white; padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 0.8rem; }
+    .btn-small { background: #2196f3; color: white; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 0.8rem; border: none; cursor: pointer; }
+    .btn-cancel { background: #e53935; }
+    .status-badge { padding: 0.15rem 0.7rem; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .status-Paid       { background: #c8e6c9; color: #1b5e20; }
+    .status-Cancelled  { background: #ffcdd2; color: #c62828; }
+    .status-Pending    { background: #fff3cd; color: #856404; }
+    .status-Refunded   { background: #e1bee7; color: #6a1b9a; }
 </style>
 <h1>Transaction History</h1>
 <div class="filter-bar">
@@ -33,19 +24,45 @@ $transactions = $result->fetch_all(MYSQLI_ASSOC);
 </div>
 <div class="table-container">
     <table>
-        <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Payment</th><th>Action</th></tr></thead>
+        <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Payment</th><th>Status</th><th>Action</th></tr></thead>
         <tbody>
             <?php foreach ($transactions as $t): ?>
-            <tr><td><?php echo $t['sale_id']; ?></td><td><?php echo $t['sale_date']; ?></td><td><?php echo htmlspecialchars($t['customer']); ?></td><td>Rs. <?php echo number_format($t['total'],2); ?></td><td><?php echo $t['payment_method']; ?></td><td><a href="invoice.php?sale_id=<?php echo $t['sale_id']; ?>" class="btn-small">View</a></td></tr>
+            <tr data-sale="<?php echo htmlspecialchars($t['sale_id']); ?>">
+                <td><?php echo htmlspecialchars($t['sale_id']); ?></td>
+                <td><?php echo htmlspecialchars($t['sale_date']); ?></td>
+                <td><?php echo htmlspecialchars(trim((string)$t['customer'])); ?></td>
+                <td>Rs. <?php echo number_format($t['total'],2); ?></td>
+                <td><?php echo htmlspecialchars((string)$t['payment_method']); ?></td>
+                <td><span class="status-badge status-<?php echo htmlspecialchars($t['status']); ?>"><?php echo htmlspecialchars($t['status']); ?></span></td>
+                <td>
+                    <a href="invoice.php?sale_id=<?php echo urlencode($t['sale_id']); ?>" class="btn-small">View</a>
+                    <?php if ($t['status'] === 'Paid'): ?>
+                        <button class="btn-small btn-cancel" onclick="cancelSale('<?php echo htmlspecialchars($t['sale_id']); ?>')">Cancel</button>
+                    <?php endif; ?>
+                </td>
+            </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 </div>
 <script>
 document.getElementById('applyFilter').addEventListener('click', function() {
-    let date = document.getElementById('dateFilter').value;
-    if (date) window.location.href = 'transactions.php?date=' + date;
-    else window.location.href = 'transactions.php';
+    const d = document.getElementById('dateFilter').value;
+    window.location.href = d ? ('transactions.php?date=' + d) : 'transactions.php';
 });
+
+function cancelSale(saleId) {
+    const reason = prompt('Reason for cancelling sale ' + saleId + '? (optional)') ;
+    if (reason === null) return; // user pressed Cancel
+    const body = new URLSearchParams({ action: 'cancel', sale_id: saleId, reason: reason });
+    fetch('/fertilizer-shop/ajax/php/sales.php', { method: 'POST', credentials: 'same-origin', body: body })
+        .then(r => r.json())
+        .then(res => {
+            if (!res.ok) { alert('Error: ' + (res.error || res.message || 'unknown')); return; }
+            alert('Sale ' + saleId + ' cancelled. Stock restored.');
+            location.reload();
+        })
+        .catch(() => alert('Server error'));
+}
 </script>
-<?php include '../includes/admin_footer.php'; ?>
+<?php include __DIR__ . '/../../partials/admin_footer.php'; ?>

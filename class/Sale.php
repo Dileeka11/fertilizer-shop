@@ -14,6 +14,17 @@ final class Sale
             throw new InvalidArgumentException('No items in sale');
         }
 
+        // Stock check: reject if any line exceeds current available stock.
+        foreach ($items as $i) {
+            $p = Product::find((int)$i['product_no']);
+            if (!$p) {
+                throw new RuntimeException('Product not found (id ' . (int)$i['product_no'] . ')');
+            }
+            if ((int)$i['qty'] > (int)$p['stock']) {
+                throw new RuntimeException('Insufficient stock for "' . $p['name'] . '" — only ' . (int)$p['stock'] . ' available.');
+            }
+        }
+
         $subtotal = 0.0;
         foreach ($items as $i) {
             $subtotal += (float)$i['price'] * (int)$i['qty'];
@@ -135,5 +146,35 @@ final class Sale
             'sales' => (float)Database::scalar("SELECT IFNULL(SUM(total),0) FROM sales WHERE DATE(sale_date)=CURDATE() AND status='Paid'"),
             'count' => (int)Database::scalar("SELECT COUNT(*) FROM sales WHERE DATE(sale_date)=CURDATE() AND status='Paid'"),
         ];
+    }
+
+    /**
+     * Void a previously-recorded sale: restock all items and mark Cancelled.
+     * Returns true if it was cancelled, false if already cancelled or not found.
+     */
+    public static function cancel(int $saleNo, string $reason = ''): bool
+    {
+        $sale = self::find($saleNo);
+        if (!$sale) return false;
+        if ($sale['status'] === 'Cancelled') return false;
+
+        Database::beginTransaction();
+        try {
+            foreach (self::items($saleNo) as $item) {
+                Inventory::increaseStock((int)$item['product_no'], (int)$item['quantity']);
+                Inventory::logMovement(
+                    (int)$item['product_no'],
+                    (int)$item['quantity'],
+                    'IN',
+                    'Sale cancelled: ' . ($sale['sale_id'] ?? '#' . $saleNo) . ($reason ? ' — ' . $reason : '')
+                );
+            }
+            Database::exec("UPDATE sales SET status = 'Cancelled' WHERE sale_no = ?", 'i', [$saleNo]);
+            Database::commit();
+            return true;
+        } catch (Throwable $e) {
+            Database::rollback();
+            throw $e;
+        }
     }
 }

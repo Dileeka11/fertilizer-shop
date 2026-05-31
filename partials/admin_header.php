@@ -61,8 +61,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <?php if ($role == 'owner'): ?>
                     <li><a href="/fertilizer-shop/admin/owner/dashboard.php" class="<?php echo $current_page == 'dashboard.php' ? 'active' : ''; ?>"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
                     <li><a href="/fertilizer-shop/admin/operator/inventory.php" class="<?php echo $current_page == 'inventory.php' ? 'active' : ''; ?>"><i class="fas fa-boxes"></i> <span>Inventory</span></a></li>
+                    <li><a href="/fertilizer-shop/admin/owner/suppliers.php" class="<?php echo $current_page == 'suppliers.php' ? 'active' : ''; ?>"><i class="fas fa-truck"></i> <span>Suppliers</span></a></li>
+                    <li><a href="/fertilizer-shop/admin/owner/users.php" class="<?php echo in_array($current_page, ['users.php','add-user.php','edit-user.php']) ? 'active' : ''; ?>"><i class="fas fa-user-tie"></i> <span>Staff</span></a></li>
                     <li><a href="/fertilizer-shop/admin/cashier/pos.php" class="<?php echo $current_page == 'pos.php' ? 'active' : ''; ?>"><i class="fas fa-cash-register"></i> <span>POS</span></a></li>
-                    <li><a href="/fertilizer-shop/admin/owner/sales_report.php" class="<?php echo $current_page == 'sales_report.php' ? 'active' : ''; ?>"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
+                    <li><a href="/fertilizer-shop/admin/cashier/transactions.php" class="<?php echo $current_page == 'transactions.php' ? 'active' : ''; ?>"><i class="fas fa-history"></i> <span>Transactions</span></a></li>
+                    <li><a href="/fertilizer-shop/admin/owner/reports.php" class="<?php echo in_array($current_page, ['reports.php','sales_report.php','stock_report.php','orders_report.php','revenue_summary.php']) ? 'active' : ''; ?>"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
                 <?php elseif ($role == 'cashier'): ?>
                     <li><a href="/fertilizer-shop/admin/cashier/pos.php" class="<?php echo $current_page == 'pos.php' ? 'active' : ''; ?>"><i class="fas fa-cash-register"></i> <span>POS</span></a></li>
                     <li><a href="/fertilizer-shop/admin/cashier/transactions.php" class="<?php echo $current_page == 'transactions.php' ? 'active' : ''; ?>"><i class="fas fa-history"></i> <span>Transactions</span></a></li>
