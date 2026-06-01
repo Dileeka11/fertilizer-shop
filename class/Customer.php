@@ -19,6 +19,50 @@ final class Customer
         return Database::one("SELECT * FROM customers WHERE email = ?", 's', [$email]);
     }
 
+    /**
+     * Live-search customers by name, phone or email for the POS lookup.
+     * Excludes the anonymous walk-in placeholder (customer_no=1).
+     */
+    public static function search(string $term, int $limit = 8): array
+    {
+        $term = trim($term);
+        if ($term === '') return [];
+        $like = '%' . $term . '%';
+        return Database::all(
+            "SELECT customer_no, customer_id,
+                    CONCAT(first_name,' ',IFNULL(last_name,'')) AS name,
+                    email, phone, address
+             FROM customers
+             WHERE customer_no <> 1
+               AND (first_name LIKE ? OR last_name LIKE ? OR phone LIKE ? OR email LIKE ?
+                    OR CONCAT(first_name,' ',IFNULL(last_name,'')) LIKE ?)
+             ORDER BY name
+             LIMIT " . (int)$limit,
+            'sssss',
+            [$like, $like, $like, $like, $like]
+        );
+    }
+
+    /**
+     * Ensure the anonymous walk-in customer (customer_no=1) used by POS exists.
+     * Idempotent — safe to call before every POS sale. Returns its customer_no.
+     */
+    public static function ensureWalkIn(): int
+    {
+        $found = self::find(1);
+        if ($found) return 1;
+
+        // 'WALKIN' (not the C-series) so it can't collide with the customer_id
+        // values findOrCreateGuest() generates for online customers.
+        Database::insert(
+            "INSERT INTO customers (customer_no, customer_id, first_name, last_name, type)
+             VALUES (1, 'WALKIN', 'Walk-in', 'Customer', 'walkin')",
+            '',
+            []
+        );
+        return 1;
+    }
+
     public static function findOrCreateGuest(string $name, string $email, string $phone, string $address): int
     {
         $found = self::findByEmail($email);

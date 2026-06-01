@@ -313,7 +313,7 @@ INSERT INTO `categories` (`category_id`,`category_name`,`slug`) VALUES
 
 -- Walk-in customer (customer_no=1) used by POS for anonymous sales
 INSERT INTO `customers` (`customer_no`,`customer_id`,`first_name`,`last_name`,`type`)
-VALUES (1,'C0001','Walk-in','Customer','walkin');
+VALUES (1,'WALKIN','Walk-in','Customer','walkin');
 
 -- Default email_config row
 INSERT INTO `email_config` (`to_email`,`from_email`,`subject`,`message`) VALUES (

@@ -12,14 +12,19 @@ if (!$input || empty($input['items'])) {
 }
 
 try {
-    $customerNo = 1; // walk-in
-    if (!empty($input['customer_name'])) {
+    // 1) An existing customer picked from live search, 2) a typed name (find/create),
+    // otherwise 3) the anonymous walk-in (self-heals if the seed row is missing).
+    if (!empty($input['customer_no']) && Customer::find((int)$input['customer_no'])) {
+        $customerNo = (int)$input['customer_no'];
+    } elseif (!empty($input['customer_name'])) {
         $customerNo = Customer::findOrCreateGuest(
             (string)$input['customer_name'],
             (string)($input['customer_email']   ?? ''),
             (string)($input['customer_phone']   ?? ''),
             (string)($input['customer_address'] ?? '')
         );
+    } else {
+        $customerNo = Customer::ensureWalkIn();
     }
     $saleNo = Sale::create(
         $input['items'],

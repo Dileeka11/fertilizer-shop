@@ -8,6 +8,25 @@ $total_stock_value = $counts['stock_value'];
 $low_stock_count   = $counts['low_stock'];
 
 $low_stock_products = Product::lowStock();
+
+// ---- Inventory chart data ----
+$stockByProduct  = Report::stockByProduct(10);       // lowest-stock products
+$stockByCategory = Report::stockValueByCategory();    // stock value per category
+$movementTrend   = Report::stockMovementTrend(14);    // IN/OUT flow, last 14 days
+
+// Bar chart: current stock vs reorder level
+$barLabels  = array_map(fn($r) => $r['name'], $stockByProduct);
+$barStock   = array_map(fn($r) => (int)$r['stock'], $stockByProduct);
+$barReorder = array_map(fn($r) => (int)$r['reorder_level'], $stockByProduct);
+
+// Bar chart: stock value per category
+$catLabels  = array_map(fn($r) => $r['category'], $stockByCategory);
+$catValues  = array_map(fn($r) => round((float)$r['value'], 2), $stockByCategory);
+
+// Line chart: stock movement trend
+$lineLabels = array_map(fn($r) => $r['label'], $movementTrend);
+$lineIn     = array_map(fn($r) => (int)$r['in_qty'], $movementTrend);
+$lineOut    = array_map(fn($r) => (int)$r['out_qty'], $movementTrend);
 ?>
 
 <style>
@@ -34,6 +53,25 @@ $low_stock_products = Product::lowStock();
     <div class="stat-card"><div class="stat-info"><h3>Total Products</h3><div class="stat-number"><?php echo $total_products; ?></div></div><div class="stat-icon"><i class="fas fa-box"></i></div></div>
     <div class="stat-card"><div class="stat-info"><h3>Total Stock Value</h3><div class="stat-number">Rs. <?php echo number_format($total_stock_value); ?></div></div><div class="stat-icon"><i class="fas fa-rupee-sign"></i></div></div>
     <div class="stat-card"><div class="stat-info"><h3>Low Stock Items</h3><div class="stat-number <?php echo $low_stock_count > 0 ? 'stat-warning' : ''; ?>"><?php echo $low_stock_count; ?></div></div><div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div></div>
+</div>
+
+<!-- ===== Inventory analytics ===== -->
+<div class="chart-grid">
+    <div class="chart-card">
+        <h3><i class="fas fa-boxes"></i> Stock Levels &amp; Reorder Points (lowest 10)</h3>
+        <canvas id="stockBar"></canvas>
+    </div>
+    <div class="chart-card">
+        <h3><i class="fas fa-layer-group"></i> Stock Value by Category</h3>
+        <canvas id="categoryBar"></canvas>
+    </div>
+</div>
+
+<div class="chart-grid" style="grid-template-columns: 1fr;">
+    <div class="chart-card">
+        <h3><i class="fas fa-chart-line"></i> Inventory Movement — Stock In vs Out (last 14 days)</h3>
+        <canvas id="movementLine" style="max-height: 280px;"></canvas>
+    </div>
 </div>
 
 <h2>Low Stock Alerts</h2>
@@ -111,6 +149,69 @@ function showProductDetails(productNo) {
         });
 }
 function closeModal() { document.getElementById('productModal').style.display = 'none'; }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const GREEN = '#2e7d32', AMBER = '#ff8f00', RED = '#c62828';
+Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+Chart.defaults.color = '#555';
+
+// Bar — current stock vs reorder level
+new Chart(document.getElementById('stockBar'), {
+    type: 'bar',
+    data: {
+        labels: <?php echo json_encode($barLabels); ?>,
+        datasets: [
+            { label: 'Current Stock', data: <?php echo json_encode($barStock); ?>, backgroundColor: GREEN, borderRadius: 6 },
+            { label: 'Reorder Level', data: <?php echo json_encode($barReorder); ?>, backgroundColor: AMBER, borderRadius: 6 }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'Units' } } }
+    }
+});
+
+// Bar — stock value by category
+new Chart(document.getElementById('categoryBar'), {
+    type: 'bar',
+    data: {
+        labels: <?php echo json_encode($catLabels); ?>,
+        datasets: [{
+            label: 'Stock Value (Rs.)',
+            data: <?php echo json_encode($catValues); ?>,
+            backgroundColor: ['#2e7d32','#43a047','#ff8f00','#1976d2','#8e24aa','#00897b','#c62828','#5d4037'],
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: c => 'Rs. ' + Number(c.raw).toLocaleString() } }
+        },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'Rs.' } } }
+    }
+});
+
+// Line — stock movement trend
+new Chart(document.getElementById('movementLine'), {
+    type: 'line',
+    data: {
+        labels: <?php echo json_encode($lineLabels); ?>,
+        datasets: [
+            { label: 'Stock In',  data: <?php echo json_encode($lineIn); ?>,  borderColor: GREEN, backgroundColor: 'rgba(46,125,50,0.12)', fill: true, tension: 0.35 },
+            { label: 'Stock Out', data: <?php echo json_encode($lineOut); ?>, borderColor: RED,   backgroundColor: 'rgba(198,40,40,0.10)', fill: true, tension: 0.35 }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'Units moved' } } }
+    }
+});
 </script>
 
 <?php include __DIR__ . '/../../partials/admin_footer.php'; ?>

@@ -46,6 +46,21 @@ $products = Product::all(['active_only' => true]);
     .cart-table tbody button { width: 26px; height: 26px; border: none; border-radius: 50%; background: #e8f5e9; color: #1b5e20; cursor: pointer; font-weight: 700; line-height: 1; transition: background 0.15s; }
     .cart-table tbody button:hover { background: #c8e6c9; }
     #cartTotal { font-size: 1.2rem; color: #1b5e20; border-top: 2px dashed #e0e8e0; padding-top: 0.8rem; }
+
+    /* ---- Customer live search ---- */
+    .customer-section { margin-bottom: 0.8rem; }
+    .customer-search-wrap { position: relative; }
+    .customer-results { display: none; position: absolute; left: 0; right: 0; top: calc(100% + 2px); z-index: 50; background: #fff; border: 1px solid #d6e0d6; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-height: 260px; overflow-y: auto; }
+    .customer-results.show { display: block; }
+    .customer-results .cust-item { padding: 0.55rem 0.8rem; cursor: pointer; border-bottom: 1px solid #f0f3f0; }
+    .customer-results .cust-item:last-child { border-bottom: none; }
+    .customer-results .cust-item:hover, .customer-results .cust-item.active { background: #e8f5e9; }
+    .customer-results .cust-name { font-weight: 600; color: #1b5e20; }
+    .customer-results .cust-meta { font-size: 0.78rem; color: #757575; margin-top: 0.1rem; }
+    .customer-results .cust-empty { padding: 0.7rem 0.8rem; color: #757575; font-size: 0.85rem; }
+    .customer-selected { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.4rem; padding: 0.45rem 0.7rem; background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 8px; color: #1b5e20; font-weight: 600; font-size: 0.9rem; }
+    .customer-selected button { width: 24px; height: 24px; border: none; border-radius: 50%; background: #c8e6c9; color: #1b5e20; cursor: pointer; font-weight: 700; line-height: 1; flex-shrink: 0; }
+    .customer-selected button:hover { background: #a5d6a7; }
 </style>
 
 <div class="section-header">
@@ -64,7 +79,14 @@ $products = Product::all(['active_only' => true]);
     <div class="cart-panel">
         <h3><i class="fas fa-receipt"></i> Current Sale</h3>
         <div class="customer-section">
-            <input type="text" id="customerName" placeholder="Customer Name (optional)" style="width:100%; margin-bottom:0.5rem; padding:0.5rem; border:1px solid #ccc; border-radius:8px;">
+            <div class="customer-search-wrap">
+                <input type="text" id="customerName" autocomplete="off" placeholder="Search customer by name / phone / email (optional)" style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:8px;">
+                <div id="customerResults" class="customer-results"></div>
+            </div>
+            <div id="customerSelected" class="customer-selected" style="display:none;">
+                <span id="customerSelectedLabel"></span>
+                <button type="button" id="customerClear" title="Clear selected customer">&times;</button>
+            </div>
         </div>
         <table class="cart-table">
             <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
@@ -120,6 +142,9 @@ const products = <?php echo json_encode(array_map(function($p){
     ];
 }, $products)); ?>;
 let cart = [];
+let selectedCustomer = null; // { customer_no, name, ... } when picked from search
+
+const CUSTOMER_SEARCH_URL = '<?php echo BASE_URL; ?>/ajax/php/customer_search.php';
 
 const modal       = document.getElementById('productModal');
 const paymentMdl  = document.getElementById('paymentModal');
@@ -206,21 +231,105 @@ function renderCart() {
     document.getElementById('cartTotal').innerText = 'Total: Rs. ' + total.toFixed(2);
 }
 
+// ---- Customer live search ----
+const customerInput     = document.getElementById('customerName');
+const customerResults   = document.getElementById('customerResults');
+const customerSelected  = document.getElementById('customerSelected');
+const customerSelLabel  = document.getElementById('customerSelectedLabel');
+let custSearchTimer = null;
+let custActiveIdx   = -1;
+let custLastResults = [];
+
+function hideCustomerResults() { customerResults.classList.remove('show'); customerResults.innerHTML = ''; custActiveIdx = -1; }
+
+function renderCustomerResults(rows) {
+    custLastResults = rows;
+    custActiveIdx = -1;
+    if (!rows.length) {
+        customerResults.innerHTML = '<div class="cust-empty">No matching customers. Type a name to create a new one on sale.</div>';
+        customerResults.classList.add('show');
+        return;
+    }
+    customerResults.innerHTML = rows.map((c, i) => {
+        const meta = [c.phone, c.email].filter(Boolean).join(' &middot; ');
+        return '<div class="cust-item" data-idx="' + i + '">' +
+                   '<div class="cust-name">' + escapeHtml(c.name) + '</div>' +
+                   (meta ? '<div class="cust-meta">' + escapeHtml(meta).replace('&amp;middot;', '&middot;') + '</div>' : '') +
+               '</div>';
+    }).join('');
+    customerResults.querySelectorAll('.cust-item').forEach(el => {
+        el.addEventListener('click', () => pickCustomer(custLastResults[+el.dataset.idx]));
+    });
+    customerResults.classList.add('show');
+}
+
+function pickCustomer(c) {
+    selectedCustomer = c;
+    customerSelLabel.textContent = c.name + (c.phone ? ' (' + c.phone + ')' : '');
+    customerSelected.style.display = 'flex';
+    customerInput.value = '';
+    customerInput.style.display = 'none';
+    hideCustomerResults();
+}
+
+function clearSelectedCustomer() {
+    selectedCustomer = null;
+    customerSelected.style.display = 'none';
+    customerInput.style.display = '';
+    customerInput.value = '';
+    customerInput.focus();
+}
+
+function searchCustomers(term) {
+    fetch(CUSTOMER_SEARCH_URL + '?action=search&q=' + encodeURIComponent(term), { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(d => { if (d.ok) renderCustomerResults(d.data || []); })
+        .catch(() => hideCustomerResults());
+}
+
+customerInput.addEventListener('input', e => {
+    const term = e.target.value.trim();
+    clearTimeout(custSearchTimer);
+    if (term.length < 2) { hideCustomerResults(); return; }
+    custSearchTimer = setTimeout(() => searchCustomers(term), 250);
+});
+
+customerInput.addEventListener('keydown', e => {
+    const items = customerResults.querySelectorAll('.cust-item');
+    if (!customerResults.classList.contains('show') || !items.length) return;
+    if (e.key === 'ArrowDown')      { e.preventDefault(); custActiveIdx = Math.min(custActiveIdx + 1, items.length - 1); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); custActiveIdx = Math.max(custActiveIdx - 1, 0); }
+    else if (e.key === 'Enter')     { if (custActiveIdx >= 0) { e.preventDefault(); pickCustomer(custLastResults[custActiveIdx]); } return; }
+    else if (e.key === 'Escape')    { hideCustomerResults(); return; }
+    else return;
+    items.forEach((el, i) => el.classList.toggle('active', i === custActiveIdx));
+});
+
+document.getElementById('customerClear').addEventListener('click', clearSelectedCustomer);
+document.addEventListener('click', e => {
+    if (!e.target.closest('.customer-search-wrap')) hideCustomerResults();
+});
+
 document.getElementById('openPickerBtn').addEventListener('click', openProductModal);
 modalSearch.addEventListener('input', e => renderProductList(e.target.value));
-document.getElementById('clearCartBtn').addEventListener('click', () => { cart = []; renderCart(); });
+document.getElementById('clearCartBtn').addEventListener('click', () => { cart = []; clearSelectedCustomer(); renderCart(); });
 document.getElementById('checkoutBtn').addEventListener('click', () => {
     if (cart.length === 0) { alert('Cart empty'); return; }
     paymentMdl.classList.add('show');
 });
 document.getElementById('completeSaleBtn').addEventListener('click', () => {
-    const customerName = document.getElementById('customerName').value.trim();
     const paymentMethod = document.getElementById('paymentMethod').value;
+    const payload = { items: cart, payment_method: paymentMethod };
+    if (selectedCustomer) {
+        payload.customer_no = selectedCustomer.customer_no;
+    } else {
+        payload.customer_name = customerInput.value.trim();
+    }
     fetch('process_sale.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ items: cart, customer_name: customerName, payment_method: paymentMethod })
+        body: JSON.stringify(payload)
     })
     .then(res => res.json())
     .then(data => {

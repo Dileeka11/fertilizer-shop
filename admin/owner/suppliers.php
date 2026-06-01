@@ -2,7 +2,8 @@
 require_once __DIR__ . '/../../partials/auth_check.php';
 include __DIR__ . '/../../partials/admin_header.php';
 
-$suppliers = Supplier::all();
+$suppliers  = Supplier::all();
+$categories = Category::all();
 ?>
 
 <div class="section-header">
@@ -71,7 +72,12 @@ $suppliers = Supplier::all();
                 </div>
                 <div class="form-group">
                     <label>Products Supplied</label>
-                    <textarea id="products" rows="2" placeholder="e.g., Fertilizers, Seeds, Tools"></textarea>
+                    <select id="products" multiple size="<?php echo max(3, min(6, count($categories))); ?>">
+                        <?php foreach ($categories as $c): ?>
+                        <option value="<?php echo htmlspecialchars($c['category_name']); ?>"><?php echo htmlspecialchars($c['category_name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small style="color:#777;">Hold Ctrl (Cmd on Mac) to select multiple categories.</small>
                 </div>
                 <div class="form-group">
                     <label>Address</label>
@@ -113,6 +119,18 @@ const productsField = document.getElementById('products');
 const addressField = document.getElementById('address');
 let editMode = false;
 
+// Read the multi-select as a comma-separated string.
+function getSelectedProducts() {
+    return Array.from(productsField.selectedOptions).map(function(o) { return o.value; }).join(', ');
+}
+// Pre-select options that match the stored comma-separated string.
+function setSelectedProducts(value) {
+    const chosen = (value || '').split(',').map(function(s) { return s.trim().toLowerCase(); });
+    Array.from(productsField.options).forEach(function(o) {
+        o.selected = chosen.indexOf(o.value.trim().toLowerCase()) !== -1;
+    });
+}
+
 document.getElementById('addSupplierBtn').onclick = function() {
     editMode = false;
     modalTitle.innerText = 'Add New Supplier';
@@ -132,7 +150,7 @@ supplierForm.onsubmit = function(e) {
         contact_person:    contactPersonField.value.trim(),
         phone:             phoneField.value.trim(),
         email:             emailField.value.trim(),
-        products_supplied: productsField.value.trim(),
+        products_supplied: getSelectedProducts(),
         address:           addressField.value.trim(),
         status:            'Active'
     };
@@ -155,7 +173,7 @@ window.editSupplier = function(id) {
         contactPersonField.value= s.contact_person || '';
         phoneField.value        = s.phone || '';
         emailField.value        = s.email || '';
-        productsField.value     = s.products_supplied || '';
+        setSelectedProducts(s.products_supplied || '');
         addressField.value      = s.address || '';
         modalTitle.innerText    = 'Edit Supplier';
         modal.style.display = 'flex';

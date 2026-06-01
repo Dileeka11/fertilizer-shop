@@ -19,7 +19,7 @@ try {
             echo json_encode(['ok'=>false,'error'=>'Cart is empty']); exit;
         }
 
-        $customerNo = 1; // walk-in default
+        $customerNo = Customer::ensureWalkIn(); // walk-in default (self-heals if seed row missing)
         if (!empty($payload['customer_name'])) {
             $customerNo = Customer::findOrCreateGuest(
                 (string)$payload['customer_name'],
