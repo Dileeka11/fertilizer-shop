@@ -28,7 +28,7 @@ include __DIR__ . '/../../partials/admin_header.php';
 
 <?php if ($error): ?><div style="background:#ffebee;color:#c62828;padding:1rem;border-radius:8px;margin-bottom:1rem;"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
 
-<div style="max-width: 600px; margin:0 auto; background:#fff; padding:2rem; border-radius:20px;">
+<div class="admin-card" style="max-width: 600px; margin:0 auto; padding:2rem;">
     <form action="add-user.php" method="post">
         <div class="form-group">
             <label>Full Name</label>

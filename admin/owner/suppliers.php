@@ -5,10 +5,8 @@ include __DIR__ . '/../../partials/admin_header.php';
 $suppliers = Supplier::all();
 ?>
 
-<h1>Suppliers</h1>
-
 <div class="section-header">
-    <h2>Manage Suppliers</h2>
+    <h1><i class="fas fa-truck"></i> Suppliers</h1>
     <button id="addSupplierBtn" class="btn-primary"><i class="fas fa-plus"></i> Add New Supplier</button>
 </div>
 
@@ -90,14 +88,15 @@ $suppliers = Supplier::all();
 </div>
 
 <style>
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-.modal-content { background: white; border-radius: 16px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #eee; }
-.modal-header h2 { margin: 0; color: #2e7d32; }
-.close { font-size: 1.5rem; cursor: pointer; color: #666; }
-.close:hover { color: #000; }
-.modal-body { padding: 1.5rem; }
-.form-buttons { display: flex; gap: 1rem; margin-top: 1rem; }
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.55); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.modal-content { background: white; border-radius: 18px; width: 90%; max-width: 600px; max-height: 90vh; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.3); animation: modalPop 0.18s ease; }
+@keyframes modalPop { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.1rem 1.5rem; background: linear-gradient(135deg, #1b5e20, #2e7d32); color: #fff; }
+.modal-header h2 { margin: 0; color: #fff; font-size: 1.2rem; }
+.close { font-size: 1.6rem; cursor: pointer; color: #fff; opacity: 0.85; line-height: 1; }
+.close:hover { opacity: 1; }
+.modal-body { padding: 1.5rem; max-height: 70vh; overflow-y: auto; }
+.form-buttons { display: flex; gap: 1rem; margin-top: 1.2rem; }
 </style>
 
 <script src="/fertilizer-shop/ajax/js/suppliers.js"></script>

@@ -132,7 +132,9 @@ final class Product
                     (product_id, category_id, supplier_no, name, brand, description, image,
                      price, stock, reorder_level, discount, status)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                'siisssdiidss',
+                // product_id(s) category_id(i) supplier_no(i) name(s) brand(s)
+                // description(s) image(s) price(d) stock(i) reorder_level(i) discount(d) status(s)
+                'siissssdiids',
                 [
                     $pid,
                     (int)$d['category_id'],
@@ -177,7 +179,9 @@ final class Product
                      image = COALESCE(NULLIF(?, ''), image),
                      price = ?, stock = ?, reorder_level = ?, discount = ?, status = ?
                  WHERE product_no = ?",
-                'iisssddiidsi',
+                // category_id(i) supplier_no(i) name(s) brand(s) description(s) image(s)
+                // price(d) stock(i) reorder_level(i) discount(d) status(s) product_no(i)
+                'iissssdiidsi',
                 [
                     (int)$d['category_id'],
                     !empty($d['supplier_no']) ? (int)$d['supplier_no'] : null,

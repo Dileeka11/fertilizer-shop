@@ -18,7 +18,7 @@ $orders = Sale::list(['customer_no' => (int)$_SESSION['customer_no'], 'type' => 
                 <td><?php echo htmlspecialchars($o['sale_date']); ?></td>
                 <td>Rs. <?php echo number_format($o['total'],2); ?></td>
                 <td><?php echo htmlspecialchars($o['status']); ?></td>
-                <td><a href="/fertilizer-shop/admin/cashier/invoice.php?sale_id=<?php echo urlencode($o['sale_id']); ?>" target="_blank">View</a></td>
+                <td><a href="/fertilizer-shop/public/account/invoice.php?sale_id=<?php echo urlencode($o['sale_id']); ?>" target="_blank">View</a></td>
             </tr>
             <?php endforeach; ?>
         </tbody>

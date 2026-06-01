@@ -17,12 +17,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <style>
     .product-detail { display: flex; gap: 2rem; flex-wrap: wrap; }
-    .product-info { flex: 1; }
+    .product-media { flex: 1; min-width: 280px; }
+    .product-media img { width: 100%; max-width: 420px; border-radius: 16px; box-shadow: 0 4px 14px rgba(27,94,32,0.12); background: #f1f6f1; object-fit: cover; }
+    .product-info { flex: 1; min-width: 280px; }
     .product-price { font-size: 2rem; color: #ff8f00; }
     .btn-primary { background: #2e7d32; color: white; padding: 0.8rem 2rem; border: none; border-radius: 50px; cursor: pointer; }
 </style>
 <div class="container">
     <div class="product-detail">
+        <div class="product-media">
+            <img src="<?php echo productImageUrl($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+        </div>
         <div class="product-info">
             <h1><?php echo htmlspecialchars($product['name']); ?></h1>
             <p><strong>Category:</strong> <?php echo htmlspecialchars($product['category_name']); ?></p>

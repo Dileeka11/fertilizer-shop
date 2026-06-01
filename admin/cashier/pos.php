@@ -34,18 +34,35 @@ $products = Product::all(['active_only' => true]);
     .product-card .pprice { color: #ff8f00; font-weight: 700; margin-top: 0.3rem; }
     .product-card .pstock { font-size: 0.78rem; color: #757575; margin-top: 0.2rem; }
     .modal-empty { text-align: center; padding: 2rem; color: #757575; }
+
+    /* Modernized POS surfaces */
+    .product-panel .pos-intro-card { background: linear-gradient(135deg, #f1f8f1, #e8f5e9); border: 1px dashed #9ccc9c; border-radius: 16px; padding: 2rem; margin-top: 1.2rem; text-align: center; color: #4a5d4c; }
+    .product-panel .pos-intro-card i { font-size: 2.4rem; color: #2e7d32; margin-bottom: 0.6rem; }
+    .pos-add-btn { box-shadow: 0 4px 14px rgba(46,125,50,0.25); transition: transform 0.12s, background 0.15s; }
+    .pos-add-btn:hover { transform: translateY(-1px); }
+    .cart-panel { border: 1px solid #eef2ee; }
+    .cart-panel h3 { color: #1b5e20; border-bottom: 2px solid #e8f5e9; padding-bottom: 0.6rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .cart-table th { background: transparent; color: #6b7280; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.4px; }
+    .cart-table tbody button { width: 26px; height: 26px; border: none; border-radius: 50%; background: #e8f5e9; color: #1b5e20; cursor: pointer; font-weight: 700; line-height: 1; transition: background 0.15s; }
+    .cart-table tbody button:hover { background: #c8e6c9; }
+    #cartTotal { font-size: 1.2rem; color: #1b5e20; border-top: 2px dashed #e0e8e0; padding-top: 0.8rem; }
 </style>
 
-<h1>Point of Sale</h1>
+<div class="section-header">
+    <h1><i class="fas fa-cash-register"></i> Point of Sale</h1>
+</div>
 
 <div class="pos-container">
     <div class="product-panel">
         <button id="openPickerBtn" class="pos-add-btn"><i class="fas fa-plus"></i>&nbsp; Add Product to Sale</button>
-        <p style="margin-top:1rem; color:#757575;">Click the button to open the product picker. Selected items appear in the Current Sale panel.</p>
+        <div class="pos-intro-card">
+            <i class="fas fa-basket-shopping"></i>
+            <p>Click <strong>Add Product to Sale</strong> to open the product picker. Selected items appear in the Current Sale panel.</p>
+        </div>
     </div>
 
     <div class="cart-panel">
-        <h3>Current Sale</h3>
+        <h3><i class="fas fa-receipt"></i> Current Sale</h3>
         <div class="customer-section">
             <input type="text" id="customerName" placeholder="Customer Name (optional)" style="width:100%; margin-bottom:0.5rem; padding:0.5rem; border:1px solid #ccc; border-radius:8px;">
         </div>

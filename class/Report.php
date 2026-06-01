@@ -122,6 +122,46 @@ final class Report
         );
     }
 
+    // ---------------- Inventory chart data (dashboard) ----------------
+
+    /** Current stock vs reorder level for the N products with the lowest stock. */
+    public static function stockByProduct(int $limit = 10): array
+    {
+        return Database::all(
+            "SELECT p.name, p.stock, p.reorder_level
+             FROM products p
+             ORDER BY p.stock ASC
+             LIMIT " . (int)$limit
+        );
+    }
+
+    /** Total stock value (stock * price) grouped by category. */
+    public static function stockValueByCategory(): array
+    {
+        return Database::all(
+            "SELECT c.category_name AS category, IFNULL(SUM(p.stock * p.price),0) AS value
+             FROM categories c
+             LEFT JOIN products p ON p.category_id = c.category_id
+             GROUP BY c.category_id
+             ORDER BY value DESC"
+        );
+    }
+
+    /** Daily stock IN vs OUT quantities for the last N days (inventory flow). */
+    public static function stockMovementTrend(int $days = 14): array
+    {
+        return Database::all(
+            "SELECT DATE(created_at) AS d,
+                    DATE_FORMAT(created_at, '%b %e') AS label,
+                    SUM(CASE WHEN type='IN'  THEN change_qty ELSE 0 END) AS in_qty,
+                    SUM(CASE WHEN type='OUT' THEN change_qty ELSE 0 END) AS out_qty
+             FROM stock_movements
+             WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL " . (int)$days . " DAY)
+             GROUP BY DATE(created_at)
+             ORDER BY d"
+        );
+    }
+
     public static function onlineOrdersStats(string $start, string $end): array
     {
         $row = Database::one(

@@ -42,6 +42,25 @@ if (!function_exists('formatPrice')) {
         return 'Rs. ' . number_format((float)$price, 2);
     }
 }
+if (!function_exists('productImageUrl')) {
+    /**
+     * Resolve a product image filename to a usable URL.
+     * Treats empty / legacy-corrupt ("0") values and missing files as "no image"
+     * and falls back to an inline SVG placeholder.
+     */
+    function productImageUrl(?string $image): string {
+        $image = trim((string)$image);
+        if ($image !== '' && $image !== '0' && is_file(UPLOAD_PATH . '/products/' . $image)) {
+            return UPLOAD_URL . '/products/' . rawurlencode($image);
+        }
+        return 'data:image/svg+xml;utf8,' . rawurlencode(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">'
+            . '<rect width="120" height="120" rx="12" fill="#f1f6f1"/>'
+            . '<path d="M60 30c-16 0-30 12-30 30 16 0 30-12 30-30z" fill="#9ccc9c"/>'
+            . '<path d="M60 30c0 18 14 30 30 30 0-16-14-30-30-30z" fill="#bcd6bc"/></svg>'
+        );
+    }
+}
 if (!function_exists('redirect')) {
     function redirect(string $url): void {
         header('Location: ' . $url);
